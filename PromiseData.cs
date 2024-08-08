@@ -1,3 +1,5 @@
+using Promise.Framework.UI.Noteskins;
+
 namespace Promise.Framework
 {
     public enum NoteHitType
@@ -31,6 +33,11 @@ namespace Promise.Framework
         /// Helps with syncing the music and chart visually.
         /// </summary>
         public static float VisualOffset = 0f;
+
+        /// <summary>
+        /// The default note skin to use, should no note skin be found. WILL need to be set before creating ChartController.
+        /// </summary>
+        public static NoteSkin DefaultNoteSkin;
 
         /// <summary>
         /// The max score if the player gets all perfect hits, provided the score isn't arbitrary.
