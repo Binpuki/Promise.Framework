@@ -372,7 +372,7 @@ namespace Promise.Framework.Objects
         {
             if (NoteHeld != null)
             {
-                double length = NoteHeld.MsTime + NoteHeld.Length - (Conductor.Instance.Time * 1000d) - PromiseData.Offset;
+                double length = NoteHeld.MsTime + NoteHeld.MsLength - (Conductor.Instance.Time * 1000d) - PromiseData.Offset;
                 if (length <= PromiseData.HitWindows.Last())
                     OnNoteHit(NoteHeld, length, false);
                 else
