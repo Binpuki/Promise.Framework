@@ -82,7 +82,7 @@ namespace Promise.Framework.Objects
             Modulate = new Color(Modulate.R, Modulate.G, Modulate.B, Alpha * alphaMult);
 
             float songPos = (float)(Conductor.Instance.Time * 1000d);
-            bool isHeld = Data.Length > 0 && ParentLane.NoteHeld != null && ParentLane.NoteHeld == Data;
+            bool isHeld = Data.MsLength > 0 && ParentLane.NoteHeld != null && ParentLane.NoteHeld == Data;
 
             // in radians
             float noteAngle = ParentLane.DirectionAngle;
@@ -92,18 +92,18 @@ namespace Promise.Framework.Objects
             Vector2 posMult = new Vector2(Mathf.Cos(noteAngle), Mathf.Sin(noteAngle));
             Position = new Vector2(distance, distance) * posMult;
 
-            if (Data.Length > 0)
+            if (Data.Length > 0d)
             {
                 TailGraphic.Rotation = noteAngle;
                 
                 if (isHeld)
                 {
-                    AdjustTailLength(Data.MsTime + Data.Length - songPos + PromiseData.VisualOffset);
+                    AdjustTailLength(Data.MsTime + Data.MsLength - songPos + PromiseData.VisualOffset);
                     NoteGraphic.Visible = false;
                 }
             }
 
-            if (Data.MsTime + Data.Length - songPos <= -1000f && !isHeld)
+            if (Data.MsTime + Data.MsLength - songPos <= -1000f && !isHeld)
                 QueueFree();
         }
 
@@ -128,10 +128,10 @@ namespace Promise.Framework.Objects
             if (Data.Length <= 0d)
                 return;
             
-            TailGraphic = notePair.Tail.Instantiate<Control>();
+            TailGraphic = _notePair.Tail.Instantiate<Control>();
                 
             AdjustScrollSpeed();
-            AdjustTailLength(Data.Length);
+            AdjustTailLength(Data.MsLength);
                 
             TailGraphic.Modulate = new Color(TailGraphic.Modulate.R, TailGraphic.Modulate.G, TailGraphic.Modulate.B, 0.5f);
 
@@ -155,7 +155,7 @@ namespace Promise.Framework.Objects
             TextureRect tailSpr = tailContainer.GetNode<TextureRect>("Texture");
             TextureRect tailEndSpr = tailEndContainer.GetNode<TextureRect>("Texture");
             
-            float tailScale = (float)Data.Length / tailSpr.Texture.GetWidth() * (ParentLane.ScrollSpeed * ScrollMultiplier);
+            float tailScale = (float)Data.MsLength / tailSpr.Texture.GetWidth() * (ParentLane.ScrollSpeed * ScrollMultiplier);
             float tailEndSub = tailEndSpr.Texture.GetWidth() * tailEndSpr.Scale.X / (tailSpr.Texture.GetWidth() * tailSpr.Scale.X);
             float tailWidth = tailSpr.Texture.GetWidth() * Mathf.Max(tailScale - tailEndSub, 0f);
 
