@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Godot.Collections;
 using Promise.Framework.Utilities;
 
 namespace Promise.Framework.Chart
@@ -13,191 +13,110 @@ namespace Promise.Framework.Chart
     public partial class HoloChart : RefCounted
     {
         #region Public Variables
-        /// <summary>
-        /// The index for which chart to select to be the opponent.
-        /// </summary>
-        public int OpponentChartIndex = 0;
 
-        /// <summary>
-        /// The index for which chart to select to be playable.
-        /// </summary>
-        public int PlayerChartIndex = 1;
-        
         /// <summary>
         /// A list of BPM changes.
         /// </summary>
-        public BpmInfo[] Bpms = Array.Empty<BpmInfo>();
-        
+        public BpmInfo[] BpmInfo = System.Array.Empty<BpmInfo>();
+
         /// <summary>
         /// The default scroll speed for this chart.
         /// </summary>
         public float ScrollSpeed = 1.6f;
-        
-        /// <summary>
-        /// Whether to enable the countdown or not.
-        /// </summary>
-        public bool Countdown = true;
 
-        /// <summary>
-        /// Turning this on will use the camera positions preset on the stage. If set to false, the camera will follow the individual character camera positions.
-        /// </summary>
-        public bool UsePresetPositions = false;
-        
         /// <summary>
         /// The chart offset.
         /// </summary>
-        public float Offset = 0;
-        
+        public double Offset = 0;
+
         /// <summary>
-        /// The individual charts (or "strumlines") that each contain its own notes and character names.
+        /// The individual charts (or "strum lines") that each contain its own notes.
         /// </summary>
-        public CharacterChart[] Charts = Array.Empty<CharacterChart>();
-        
-        /// <summary>
-        /// The stage to spawn in for this chart.
-        /// </summary>
-        public string Stage = "stage";
-        
-        /// <summary>
-        /// The UI style to use for this chart.
-        /// </summary>
-        public string UiStyle = "funkin";
+        public IndividualChart[] Charts = System.Array.Empty<IndividualChart>();
+
         #endregion
-        
+
         #region Public Methods
-        
+
         #region Parsing and Converting
+
         /// <summary>
-        /// Converts a string in JSON format to a HoloChart instance.
+        /// Serializes this HoloChart instance into a Godot Dictionary.
         /// </summary>
-        /// <param name="jsonText">The string, in JSON format.</param>
-        /// <returns>A HoloChart, assuming things went well.</returns>
-        public static HoloChart Parse(string jsonText)
+        /// <returns>Itself, as a Godot Dictionary.</returns>
+        public Dictionary Serialize()
         {
-            Godot.Collections.Dictionary parsedDict = Json.ParseString(jsonText).AsGodotDictionary();
-            HoloChart chart = new HoloChart();
-
-            // Simple stuff outta the way first
-            chart.ScrollSpeed = parsedDict["scrollSpeed"].AsSingle();
-            chart.Countdown = parsedDict["countdown"].AsBool();
-            chart.UsePresetPositions = parsedDict["usePresetPositions"].AsBool();
-            chart.Offset = parsedDict["offset"].AsSingle();
-            chart.Stage = parsedDict["stage"].AsString();
-            chart.UiStyle = parsedDict["uiStyle"].AsString();
-            chart.OpponentChartIndex = parsedDict["opponentChartIndex"].AsInt32();
-            chart.PlayerChartIndex = parsedDict["playerChartIndex"].AsInt32();
-
-            // bpms
-            Godot.Collections.Array parsedBpms = parsedDict["bpms"].AsGodotArray();
-            BpmInfo[] bpms = new BpmInfo[parsedBpms.Count];
-            for (int i = 0; i < parsedBpms.Count; i++)
+            Dictionary serializedInfo = new Dictionary()
             {
-                Godot.Collections.Dictionary parsedBpmInfo = parsedBpms[i].AsGodotDictionary();
-                BpmInfo bpm = new BpmInfo();
-                bpm.Time = parsedBpmInfo["time"].AsSingle();
-                bpm.Bpm = parsedBpmInfo["bpm"].AsSingle();
-                bpm.TimeSignatureNumerator = parsedBpmInfo["timeSigNumerator"].AsInt32();
-                bpm.TimeSignatureDenominator = parsedBpmInfo["timeSigDenominator"].AsInt32();
+                { "ScrollSpeed", ScrollSpeed },
+                { "Offset", Offset }
+            };
 
-                bpms[i] = bpm;
-            }
+            Array<Dictionary> serializedBpmInfo = new Array<Dictionary>();
+            for (int i = 0; i < BpmInfo.Length; i++)
+                serializedBpmInfo.Add(BpmInfo[i].Serialize());
 
-            chart.Bpms = bpms;
+            Array<Dictionary> serializedCharts = new Array<Dictionary>();
+            for (int i = 0; i < Charts.Length; i++)
+                serializedCharts.Add(Charts[i].Serialize());
 
-            // charts
-            Godot.Collections.Array parsedCharCharts = parsedDict["characterCharts"].AsGodotArray();
-            CharacterChart[] characterCharts = new CharacterChart[parsedCharCharts.Count];
-            for (int i = 0; i < parsedCharCharts.Count; i++)
+            serializedInfo.Add("BpmInfo", serializedBpmInfo);
+            serializedInfo.Add("Charts", serializedCharts);
+
+            return serializedInfo;
+        }
+
+        /// <summary>
+        /// Converts a Godot Dictionary into a HoloChart instance.
+        /// </summary>
+        /// <param name="info">The provided Godot Dictionary</param>
+        /// <returns>The newly created HoloChart</returns>
+        public static HoloChart Deserialize(Dictionary info)
+        {
+            HoloChart chart = new HoloChart()
             {
-                Godot.Collections.Dictionary curParsedChart = parsedCharCharts[i].AsGodotDictionary();
-                CharacterChart curCharChart = new CharacterChart();
+                ScrollSpeed = info["ScrollSpeed"].AsSingle(),
+                Offset = info["Offset"].AsDouble()
+            };
 
-                curCharChart.Visible = curParsedChart["visible"].AsBool();
-                curCharChart.SpawnPointIndex = curParsedChart["spawnPointIndex"].AsInt32();
-                curCharChart.Characters = curParsedChart["characters"].AsStringArray();
-                curCharChart.Lanes = curParsedChart["lanes"].AsInt32();
+            Array<Dictionary> bpmInfo = info["BpmInfo"].AsGodotArray<Dictionary>();
+            chart.BpmInfo = new BpmInfo[bpmInfo.Count];
+            for (int i = 0; i < bpmInfo.Count; i++)
+                chart.BpmInfo[i] = Chart.BpmInfo.Deserialize(bpmInfo[i]);
+            
+            Array<Dictionary> chartInfo = info["Charts"].AsGodotArray<Dictionary>();
+            chart.Charts = new IndividualChart[bpmInfo.Count];
+            for (int i = 0; i < chartInfo.Count; i++)
+                chart.Charts[i] = IndividualChart.Deserialize(chartInfo[i]);
 
-                // notes
-                Godot.Collections.Array parsedNotes = curParsedChart["notes"].AsGodotArray();
-                NoteData[] notes = new NoteData[parsedNotes.Count];
-                for (int j = 0; j < parsedNotes.Count; j++)
-                {
-                    Godot.Collections.Dictionary parsedNote = parsedNotes[j].AsGodotDictionary();
-                    NoteData note = new NoteData();
-
-                    note.Lane = parsedNote["lane"].AsInt32();
-                    note.Type = parsedNote["type"].AsString();
-                    note.Time = parsedNote["time"].AsSingle();
-                    note.Length = parsedNote["length"].AsSingle();
-
-                    notes[j] = note;
-                }
-
-                curCharChart.Notes = notes;
-                characterCharts[i] = curCharChart;
-            }
-
-            chart.Charts = characterCharts;
-
-            parsedDict.Dispose();
             return chart.ConvertData();
         }
 
         /// <summary>
-        /// Converts this chart into Dictionary format, which can be saved as a JSON.
+        /// Converts this HoloChart instance into JSON format.
         /// </summary>
-        /// <returns>Itself, in Dictionary format.</returns>
-        public Godot.Collections.Dictionary ToDictionary()
+        /// <returns>Itself, in JSON format</returns>
+        public string Stringify()
         {
-            Godot.Collections.Dictionary serializedChart = new Godot.Collections.Dictionary();
+            Dictionary serializedInfo = Serialize();
+            string jsonString = Json.Stringify(serializedInfo);
+            serializedInfo.Dispose();
 
-            // Simple stuff
-            serializedChart.Add("scrollSpeed", ScrollSpeed);
-            serializedChart.Add("countdown", Countdown);
-            serializedChart.Add("usePresetPositions", UsePresetPositions);
-            serializedChart.Add("offset", Offset);
-            serializedChart.Add("stage", Stage);
-            serializedChart.Add("uiStyle", UiStyle);
-            serializedChart.Add("opponentChartIndex", OpponentChartIndex);
-            serializedChart.Add("playerChartIndex", PlayerChartIndex);
+            return jsonString;
+        }
+        
+        /// <summary>
+        /// Attempts to parse the string provided and returns an instance of HoloChart if successful.
+        /// </summary>
+        /// <param name="jsonString">The JSON string</param>
+        /// <returns>The HoloChart if successful.</returns>
+        public static HoloChart ParseString(string jsonString)
+        {
+            Dictionary parsedInfo = Json.ParseString(jsonString).AsGodotDictionary();
+            HoloChart chart = Deserialize(parsedInfo);
+            parsedInfo.Dispose();
 
-            // bpms
-            Godot.Collections.Array serializedBpms = new Godot.Collections.Array();
-            for (int i = 0; i < Bpms.Length; i++)
-            {
-                Godot.Collections.Dictionary serializedBpmInfo = new Godot.Collections.Dictionary();
-                serializedBpmInfo.Add("time", Bpms[i].Time);
-                serializedBpmInfo.Add("bpm", Bpms[i].Bpm);
-                serializedBpmInfo.Add("timeSigNumerator", Bpms[i].TimeSignatureNumerator);
-                serializedBpmInfo.Add("timeSigDenominator", Bpms[i].TimeSignatureDenominator);
-                serializedBpms.Add(serializedBpmInfo);
-            }
-
-            serializedChart.Add("bpms", serializedBpms);
-
-            // charts
-            Godot.Collections.Array serializedCharts = new Godot.Collections.Array();
-            for (int i = 0; i < Charts.Length; i++)
-            {
-                Godot.Collections.Dictionary curSeriChart = new Godot.Collections.Dictionary();
-                CharacterChart curChart = Charts[i];
-                curSeriChart.Add("visible", curChart.Visible);
-                curSeriChart.Add("lanes", curChart.Lanes);
-                curSeriChart.Add("characters", curChart.Characters);
-                curSeriChart.Add("spawnPointIndex", curChart.SpawnPointIndex);
-
-                // notes
-                Godot.Collections.Array serializedNotes = new Godot.Collections.Array();
-                for (int j = 0; j < curChart.Notes.Length; j++)
-                    serializedNotes.Add(curChart.Notes[j].ToDictionary());
-
-                curSeriChart.Add("notes", serializedNotes);
-                serializedCharts.Add(curSeriChart);
-            }
-
-            serializedChart.Add("characterCharts", serializedCharts);
-
-            return serializedChart;
+            return chart;
         }
         #endregion
 
@@ -207,12 +126,12 @@ namespace Promise.Framework.Chart
         /// <returns>Itself</returns>
         public HoloChart ConvertData()
         {
-            for (int i = 1; i < Bpms.Length; i++)
-                Bpms[i].MsTime = Bpms[i - 1].MsTime + ConductorUtil.MeasureToMs(Bpms[i].Time - Bpms[i - 1].Time, Bpms[i - 1].Bpm, Bpms[i].TimeSignatureNumerator);
+            for (int i = 1; i < BpmInfo.Length; i++)
+                BpmInfo[i].MsTime = BpmInfo[i - 1].MsTime + ConductorUtil.MeasureToMs(BpmInfo[i].Time - BpmInfo[i - 1].Time, BpmInfo[i - 1].Bpm, BpmInfo[i].TimeSignatureNumerator);
 
             for (int i = 0; i < Charts.Length; i++)
                 for (int n = 0; n < Charts[i].Notes.Length; n++)
-                    Charts[i].Notes[n].ConvertData(Bpms);
+                    Charts[i].Notes[n].ConvertData(BpmInfo);
 
             return this;
         }

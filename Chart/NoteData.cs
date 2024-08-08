@@ -1,5 +1,6 @@
 using System.Linq;
 using Godot;
+using Godot.Collections;
 using Promise.Framework.Utilities;
 
 namespace Promise.Framework.Chart
@@ -11,7 +12,7 @@ namespace Promise.Framework.Chart
     public partial class NoteData : RefCounted
     {
         /// <summary>
-        /// The note's lane
+        /// The note's lane.
         /// </summary>
         public int Lane = 0;
         
@@ -65,21 +66,58 @@ namespace Promise.Framework.Chart
             MsLength = ConductorUtil.MeasureToMs(Length, bpm.Bpm, bpm.TimeSignatureNumerator);
         }
 
+        #region JSON Methods
         /// <summary>
-        /// Converts its values into a Godot Dictionary to be used as a Variant.
+        /// Serializes this NoteData instance into a Godot Dictionary.
         /// </summary>
-        /// <returns>The NoteData, in Godot.Collections.Dictionary form.</returns>
-        public Godot.Collections.Dictionary ToDictionary()
+        /// <returns>Itself, as a Dictionary</returns>
+        public Dictionary Serialize() => new Dictionary()
         {
-            Godot.Collections.Dictionary returnDict = new Godot.Collections.Dictionary
-            {
-                { "Lane", Lane },
-                { "Type", Type },
-                { "Time", Time },
-                { "Length", Length }
-            };
+            { "Lane", Lane },
+            { "Type", Type },
+            { "Time", Time },
+            { "Length", Length }
+        };
+
+        /// <summary>
+        /// Converts a Godot Dictionary into a BpmInfo instance.
+        /// </summary>
+        /// <param name="info">The provided Godot Dictionary</param>
+        /// <returns>The newly created NoteData</returns>
+        public static NoteData Deserialize(Dictionary info) => new NoteData()
+        {
+            Lane = info["Lane"].AsInt32(),
+            Type = info["Type"].AsString(),
+            Time = info["Time"].AsDouble(),
+            Length = info["Length"].AsDouble()
+        };
+        
+        /// <summary>
+        /// Converts this NoteData instance into JSON format.
+        /// </summary>
+        /// <returns>This NoteData instance in JSON format.</returns>
+        public string Stringify()
+        {
+            Dictionary serializedInfo = Serialize();
+            string jsonString = Json.Stringify(serializedInfo);
+            serializedInfo.Dispose();
             
-            return returnDict;
+            return jsonString;
         }
+
+        /// <summary>
+        /// Attempts to parse the string provided and returns an instance of NoteData if successful.
+        /// </summary>
+        /// <param name="jsonString">The JSON string</param>
+        /// <returns>The NoteData if successful.</returns>
+        public static NoteData ParseString(string jsonString)
+        {
+            Dictionary parsedInfo = Json.ParseString(jsonString).AsGodotDictionary();
+            NoteData noteData = Deserialize(parsedInfo);
+            parsedInfo.Dispose();
+
+            return noteData;
+        }
+        #endregion
     }   
 }
