@@ -50,28 +50,28 @@ namespace Promise.Framework.UI.Noteskins
         /// </summary>
         /// <param name="laneCount">The amount of lanes</param>
         /// <returns>An array of resources containing the note and tail graphic</returns>
-        public NotePair[] GetNotes(int laneCount) => laneCount < _notes.Count && _notes[laneCount] != null ? _notes[laneCount].ToArray() : null;
+        public NotePair[] GetNotes(int laneCount) => _notes[laneCount] != null ? _notes[laneCount].ToArray() : null;
         
         /// <summary>
         /// Fetches an array of packed scenes for lanes according to the lane count.
         /// </summary>
         /// <param name="laneCount">The amount of lanes</param>
         /// <returns>An array of packed scenes for lanes</returns>
-        public PackedScene[] GetLanes(int laneCount) => laneCount < _lanes.Count && _lanes[laneCount] != null ? _lanes[laneCount].ToArray() : null;
+        public PackedScene[] GetLanes(int laneCount) => _lanes[laneCount] != null ? _lanes[laneCount].ToArray() : null;
 
         /// <summary>
         /// Fetches an array of packed scenes for splash graphics according to the lane count.
         /// </summary>
         /// <param name="laneCount">The amount of lanes</param>
         /// <returns>An array of packed scenes for splash graphics according to the lane count.</returns>
-        public PackedScene[] GetSplashes(int laneCount) => laneCount < _splashes.Count && _splashes[laneCount] != null ? _splashes[laneCount].ToArray() : null;
+        public PackedScene[] GetSplashes(int laneCount) => _splashes[laneCount] != null ? _splashes[laneCount].ToArray() : null;
 
         /// <summary>
         /// Fetches an array of materials for the lanes and notes according to the lane count.
         /// </summary>
         /// <param name="laneCount">The amount of lanes</param>
         /// <returns>An array of materials for the lanes and notes according to the lane count.</returns>
-        public Material[] GetMaterials(int laneCount) => laneCount < _materials.Count && _materials[laneCount] != null ? _materials[laneCount].ToArray() : null;
+        public Material[] GetMaterials(int laneCount) => _materials[laneCount] != null ? _materials[laneCount].ToArray() : null;
         #endregion
         
         #region Get Single
@@ -81,7 +81,7 @@ namespace Promise.Framework.UI.Noteskins
         /// <param name="laneCount">The amount of lanes</param>
         /// <param name="lane">The lane index</param>
         /// <returns>A resource containing both the note and tail</returns>
-        public NotePair GetNoteFromLaneGroup(int laneCount, int lane) => laneCount < _notes.Count && _notes[laneCount] != null ? _notes[laneCount][lane] : null;
+        public NotePair GetNoteFromLaneGroup(int laneCount, int lane) => _notes[laneCount] != null && lane < _notes[laneCount].Count && _notes[laneCount][lane] != null ? _notes[laneCount][lane] : null;
         
         /// <summary>
         /// Fetches a packed scene for a lane according to the provided lane count and lane index.
@@ -89,7 +89,7 @@ namespace Promise.Framework.UI.Noteskins
         /// <param name="laneCount">The amount of lanes</param>
         /// <param name="lane">The lane index</param>
         /// <returns>A packed scene for a lane</returns>
-        public PackedScene GetLaneFromLaneGroup(int laneCount, int lane) => laneCount < _lanes.Count && _lanes[laneCount] != null ? _lanes[laneCount][lane] : null;
+        public PackedScene GetLaneFromLaneGroup(int laneCount, int lane) => _lanes[laneCount] != null && lane < _lanes[laneCount].Count && _lanes[laneCount][lane] != null ? _lanes[laneCount][lane] : null;
         
         /// <summary>
         /// Fetches a packed scene for a splash graphic according to the provided lane count and lane index.
@@ -97,7 +97,7 @@ namespace Promise.Framework.UI.Noteskins
         /// <param name="laneCount">The amount of lanes</param>
         /// <param name="lane">The lane index</param>
         /// <returns>A packed scene for a splash graphic</returns>
-        public PackedScene GetSplashFromLaneGroup(int laneCount, int lane) => laneCount < _splashes.Count && _splashes[laneCount] != null ? _splashes[laneCount][lane] : null;
+        public PackedScene GetSplashFromLaneGroup(int laneCount, int lane) => _splashes[laneCount] != null && lane < _splashes[laneCount].Count && _splashes[laneCount][lane] != null ? _splashes[laneCount][lane] : null;
         
         /// <summary>
         /// Fetches the material for a note and lane according to the provided lane count and lane index.
@@ -105,7 +105,7 @@ namespace Promise.Framework.UI.Noteskins
         /// <param name="laneCount">The amount of lanes</param>
         /// <param name="lane">The lane index</param>
         /// <returns>The material for a note and lane</returns>
-        public Material GetMaterialFromLaneGroup(int laneCount, int lane) => laneCount < _materials.Count && _materials[laneCount] != null ? _materials[laneCount][lane] : null;
+        public Material GetMaterialFromLaneGroup(int laneCount, int lane) => _materials[laneCount] != null && lane < _materials[laneCount].Count && _materials[laneCount][lane] != null ? _materials[laneCount][lane] : null;
         #endregion
         
         #endregion
