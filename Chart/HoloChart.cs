@@ -85,7 +85,7 @@ namespace Promise.Framework.Chart
                 chart.BpmInfo[i] = Chart.BpmInfo.Deserialize(bpmInfo[i]);
             
             Array<Dictionary> chartInfo = info["Charts"].AsGodotArray<Dictionary>();
-            chart.Charts = new IndividualChart[bpmInfo.Count];
+            chart.Charts = new IndividualChart[chartInfo.Count];
             for (int i = 0; i < chartInfo.Count; i++)
                 chart.Charts[i] = IndividualChart.Deserialize(chartInfo[i]);
 
