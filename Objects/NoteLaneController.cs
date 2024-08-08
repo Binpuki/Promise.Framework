@@ -148,8 +148,53 @@ namespace Promise.Framework.Objects
 
             // Sorry, I'm still super paranoid from like Haxe PTSD, bear with me here...
             double songPos = Conductor.Instance.Time * 1000d;
-            if (NoteHeld != null && NoteHeld.MsTime + NoteHeld.Length < songPos)
+            if (NoteHeld != null && NoteHeld.MsTime + NoteHeld.MsLength < songPos)
                 OnNoteHit(NoteHeld, 0, false);
+            
+            if (Autoplay)
+            {
+                if (_noteHitIndex < Notes.Length)
+                {
+                    if (Notes[_noteHitIndex].MsTime - songPos <= 0)
+                    {
+                        OnNoteHit(Notes[_noteHitIndex], 0, Notes[_noteHitIndex].Length > 0);
+                        _noteHitIndex++;
+                    }
+                }
+            }
+            else
+            {
+                if (_noteHitIndex < Notes.Length)
+                {
+                    if (Notes[_noteHitIndex].MsTime - songPos <= -PromiseData.HitWindows.Last())
+                    {
+                        OnNoteMiss(Notes[_noteHitIndex], -PromiseData.HitWindows.Last() - 1);
+                        _noteHitIndex++;
+                    }
+                }
+            }
+
+            // Note spawn
+            if (_noteSpawnIndex < Notes.Length && Visible)
+            {
+                while (_noteSpawnIndex < Notes.Length && Notes[_noteSpawnIndex].MsTime - songPos <= 2000)
+                {
+                    if (Notes[_noteSpawnIndex].MsTime - songPos < 0)
+                    {
+                        _noteSpawnIndex++;
+                        continue;
+                    }
+
+                    Note note = new Note();
+                    note.Initialize(Notes[_noteSpawnIndex], this, _notePair, _noteMaterial);
+                    note.Name = $"Note {_noteSpawnIndex}";
+                    NoteContainer.AddChild(note);
+                    if (ParentController.NoteScripts.ContainsKey(Notes[_noteSpawnIndex].Type))
+                        ParentController.NoteScripts[Notes[_noteSpawnIndex].Type].OnNoteCreate(ParentController, note);
+						
+                    _noteSpawnIndex++;
+                }
+            }
         }
         
         /// <summary>
@@ -171,7 +216,7 @@ namespace Promise.Framework.Objects
             }
             
             // Pressed up
-            if (!@event.IsReleased() && !Autoplay && Pressed)
+            if (@event.IsReleased() && !Autoplay && Pressed)
             {
                 Pressed = false;
                 OnInputUp();
@@ -207,7 +252,7 @@ namespace Promise.Framework.Objects
                 if (notes != null)
                 { 
                     Note[] matchingNotes = notes.Where(x => x.Data == noteData).ToArray();
-                    for (int i = 0; i >= matchingNotes.Length; i++)
+                    for (int i = 0; i < matchingNotes.Length; i++)
                         matchingNotes[i].QueueFree();
                 }
 
@@ -240,7 +285,7 @@ namespace Promise.Framework.Objects
             if (notes != null)
             { 
                 Note[] matchingNotes = notes.Where(x => x.Data == noteData).ToArray();
-                for (int i = 0; i >= matchingNotes.Length; i++)
+                for (int i = 0; i < matchingNotes.Length; i++)
                 {
                     matchingNotes[i].Missed = true;
                     if (NoteHeld != null && NoteHeld == noteData)
