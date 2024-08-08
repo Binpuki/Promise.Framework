@@ -30,7 +30,7 @@ namespace Promise.Framework.Objects
         /// <summary>
         /// The chart data for this ChartController.
         /// </summary>
-        [Export] public CharacterChart Chart { get; private set; }
+        [Export] public IndividualChart Chart { get; private set; }
 
         /// <summary>
         /// The note scripts currently running on this chart controller.
@@ -41,9 +41,9 @@ namespace Promise.Framework.Objects
         [Signal] public delegate void NoteMissEventHandler(ChartController chartCtrl, NoteData noteData, double distanceFromTime, NoteEventResult result);
         [Signal] public delegate void PressedEventHandler(NoteLaneController noteLaneController);
 
-        public void Initialize(int laneCount, CharacterChart chart, bool autoplay = true, float scrollSpeed = 1.0f, string uiStyle = "funkin", string noteSkin = "funkin")
+        public void Initialize(int laneCount, IndividualChart chart, bool autoplay = true, float scrollSpeed = 1.0f, NoteSkin noteSkin = null)
         {
-            NoteSkin = GD.Load<NoteSkin>($"res://assets/ui/noteskins/{noteSkin}/noteskin.tres");
+            NoteSkin = noteSkin ?? PromiseData.DefaultNoteSkin;
             Chart = chart;
             Lanes = new NoteLaneController[laneCount];
 
@@ -90,6 +90,11 @@ namespace Promise.Framework.Objects
                 AddChild(noteCtrl);
                 Lanes[i] = noteCtrl;
             }
+        }
+
+        public void LoadNoteSkin(NoteSkin noteSkin)
+        {
+            
         }
         
         public void OnNoteHit(NoteData noteData, NoteHitType hitType, double distanceFromTime, bool held = false)
