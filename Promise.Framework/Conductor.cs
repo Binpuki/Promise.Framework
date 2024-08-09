@@ -174,7 +174,7 @@ namespace Promise.Framework
         /// </summary>
         public void Pause()
         {
-            _time = Time;
+            _time = RawTime;
             Playing = false;
         }
 
