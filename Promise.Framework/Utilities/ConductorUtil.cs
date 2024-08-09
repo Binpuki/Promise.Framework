@@ -37,7 +37,7 @@ namespace Promise.Framework.Utilities
         /// <returns>The measure, in steps.</returns>
         public static double MeasureToSteps(double measure, double timeSignatureNumerator = 4d, double timeSignatureDenominator = 4d)
         {
-            return measure * timeSignatureNumerator * (timeSignatureNumerator * timeSignatureDenominator);
+            return measure * timeSignatureNumerator * timeSignatureDenominator;
         }
 
         /// <summary>
