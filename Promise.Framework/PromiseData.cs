@@ -1,3 +1,4 @@
+using Godot;
 using Promise.Framework.UI.Noteskins;
 
 namespace Promise.Framework
@@ -38,6 +39,11 @@ namespace Promise.Framework
         /// The default note skin to use, should no note skin be found. WILL need to be set before creating ChartController.
         /// </summary>
         public static NoteSkin DefaultNoteSkin;
+
+        /// <summary>
+        /// The default chart controller HUD scene to use. Does not need to be assigned, but missing HUD elements will be noticeable.
+        /// </summary>
+        public static PackedScene DefaultChartHud;
 
         /// <summary>
         /// The max score if the player gets all perfect hits, provided the score isn't arbitrary.
