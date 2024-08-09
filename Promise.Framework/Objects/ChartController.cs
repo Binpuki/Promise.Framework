@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using Promise.Framework.API;
 using Promise.Framework.Chart;
+using Promise.Framework.UI;
 using Promise.Framework.UI.Noteskins;
 using Promise.Framework.Utilities;
 
@@ -28,6 +29,11 @@ namespace Promise.Framework.Objects
         [ExportGroup("References"), Export] public NoteLaneController[] Lanes { get; private set; }
 
         /// <summary>
+        /// The HUD assigned to ths ChartController.
+        /// </summary>
+        [Export] public ChartHud ChartHud { get; private set; }
+
+        /// <summary>
         /// The chart data for this ChartController.
         /// </summary>
         [Export] public IndividualChart Chart { get; private set; }
@@ -41,9 +47,12 @@ namespace Promise.Framework.Objects
         [Signal] public delegate void NoteMissEventHandler(ChartController chartCtrl, NoteData noteData, double distanceFromTime, NoteEventResult result);
         [Signal] public delegate void PressedEventHandler(NoteLaneController noteLaneController);
 
-        public void Initialize(int laneCount, IndividualChart chart, bool autoplay = true, float scrollSpeed = 1.0f, NoteSkin noteSkin = null)
+        public void Initialize(int laneCount, IndividualChart chart, bool autoplay = true, float scrollSpeed = 1.0f, NoteSkin noteSkin = null, ChartHud chartHud = null)
         {
             NoteSkin = noteSkin ?? PromiseData.DefaultNoteSkin;
+            ChartHud = chartHud ?? PromiseData.DefaultChartHud.Instantiate<ChartHud>();
+            AddChild(ChartHud);
+            
             Chart = chart;
             Lanes = new NoteLaneController[laneCount];
 
@@ -94,7 +103,19 @@ namespace Promise.Framework.Objects
 
         public void LoadNoteSkin(NoteSkin noteSkin)
         {
+            NoteSkin = noteSkin;
             
+            for (int i = 0; i < Lanes.Length; i++)
+                Lanes[i].ChangeNoteSkin(noteSkin);
+        }
+
+        public void LoadChartHud(ChartHud chartHud, bool downScroll)
+        {
+            ChartHud?.QueueFree();
+
+            ChartHud = chartHud;
+            ChartHud.SwitchDirection(downScroll);
+            AddChild(ChartHud);
         }
         
         public void OnNoteHit(NoteData noteData, NoteHitType hitType, double distanceFromTime, bool held = false)
@@ -164,9 +185,14 @@ namespace Promise.Framework.Objects
             {
                 Statistics.Combo++;
                 Statistics.HighestCombo = Statistics.Combo > Statistics.HighestCombo ? Statistics.Combo : Statistics.HighestCombo;
+                
+                if (Statistics.MissStreak > 0)
+                    ChartHud?.HitDistance?.ResetRating();
+                    
                 Statistics.MissStreak = 0;	
             }
 				
+            UpdateChartHud(hit, distanceFromTime, Statistics.Combo);
             EmitSignal(SignalName.NoteHit, this, noteData, (int)hitType, distanceFromTime, held, noteEventResult);
             noteEventResult.Free();
         }
@@ -191,7 +217,8 @@ namespace Promise.Framework.Objects
                 Statistics.Misses++;
                 Statistics.MissStreak++;	
             }
-				
+            
+            UpdateChartHud(NoteHitType.Miss, distanceFromTime, Statistics.Combo);
             EmitSignal(SignalName.NoteMiss, this, noteData, distanceFromTime);
             noteEventResult.Free();
         }
@@ -199,6 +226,16 @@ namespace Promise.Framework.Objects
         public void OnLanePress(NoteLaneController lane)
         {
             EmitSignal(SignalName.Pressed, lane);
+        }
+        
+        public void UpdateChartHud(NoteHitType hitType, double distanceFromTime, uint combo)
+        {
+            if (ChartHud == null)
+                return;
+
+            ChartHud.ComboDisplay?.UpdateCombo(combo);
+            ChartHud.Judgment?.Play(hitType);
+            ChartHud.HitDistance?.Play(distanceFromTime, hitType);
         }
     }
 }
