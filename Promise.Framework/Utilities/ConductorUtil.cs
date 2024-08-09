@@ -12,7 +12,7 @@ namespace Promise.Framework.Utilities
         /// <param name="bpm">The BPM</param>
         /// <param name="timeSignatureNumerator">The number of beats in a measure.</param>
         /// <returns>The measure, in milliseconds.</returns>
-        public static double MeasureToMs(double measure, double bpm, double timeSignatureNumerator = 4f)
+        public static double MeasureToMs(double measure, double bpm, double timeSignatureNumerator = 4d)
         {
             return measure * (60000d / (bpm / timeSignatureNumerator));
         }
@@ -23,7 +23,7 @@ namespace Promise.Framework.Utilities
         /// <param name="measure">The measure.</param>
         /// <param name="timeSignatureNumerator">The number of beats in a measure.</param>
         /// <returns>The measure, in beats.</returns>
-        public static double MeasureToBeats(double measure, double timeSignatureNumerator = 4f)
+        public static double MeasureToBeats(double measure, double timeSignatureNumerator = 4d)
         {
             return measure * timeSignatureNumerator;
         }
@@ -35,7 +35,7 @@ namespace Promise.Framework.Utilities
         /// <param name="timeSignatureNumerator">The number of beats in a measure.</param>
         /// <param name="timeSignatureDenominator">The type of note which equals one beat.</param>
         /// <returns>The measure, in steps.</returns>
-        public static double MeasureToSteps(double measure, double timeSignatureNumerator = 4f, double timeSignatureDenominator = 16f)
+        public static double MeasureToSteps(double measure, double timeSignatureNumerator = 4d, double timeSignatureDenominator = 4d)
         {
             return measure * timeSignatureNumerator * (timeSignatureNumerator * timeSignatureDenominator);
         }
@@ -58,7 +58,7 @@ namespace Promise.Framework.Utilities
         /// <param name="timeSignatureNumerator">The number of beats in a measure.</param>
         /// <param name="timeSignatureDenominator">The type of note which equals one beat.</param>
         /// <returns>The steps, in measures.</returns>
-        public static double StepsToMeasures(double steps, double timeSignatureNumerator = 4f, double timeSignatureDenominator = 16f)
+        public static double StepsToMeasures(double steps, double timeSignatureNumerator = 4d, double timeSignatureDenominator = 4d)
         {
             return steps / (timeSignatureNumerator * timeSignatureDenominator);
         }
