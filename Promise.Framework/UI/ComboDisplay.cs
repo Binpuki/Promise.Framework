@@ -83,6 +83,7 @@ namespace Promise.Framework.UI
 				        new Vector2(comboSpr.Texture.GetWidth() / 2f, comboSpr.Texture.GetHeight() / 2f);
 			        comboSpr.Modulate = new Color(1, 1, 1, 0.5f);
 			        comboSpr.Scale = Vector2.One;
+			        comboSpr.UseParentMaterial = true;
 			        AddChild(comboSpr);
 		        }
 	        }
