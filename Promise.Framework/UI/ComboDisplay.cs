@@ -27,10 +27,10 @@ namespace Promise.Framework.UI
 
 	    #region Public Methods
         /// <summary>
-        /// Is ran every time the linked ChartController either hits or misses a note.
+        /// Is ran every time the linked ChartController either hits or misses a note. Can be overridden by inheriting classes.
         /// </summary>
         /// <param name="combo">The current combo</param>
-        public void UpdateCombo(uint combo)
+        public virtual void UpdateCombo(uint combo)
         {
 	        for (int i = 0; i < TweenList.Count; i++)
 		        TweenList[i].Kill();
