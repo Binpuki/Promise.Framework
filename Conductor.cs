@@ -63,12 +63,12 @@ public partial class Conductor : Node
     /// <summary>
     /// The raw timestamp of this Conductor, without any corrections made to it.
     /// </summary>
-    private static double RawTime => _instance.GetRawTime();
+    public static double RawTime => _instance.GetRawTime();
         
     /// <summary>
     /// The raw timestamp of this Conductor + the chart offset.
     /// </summary>
-    private static double UncorrectedTime => _instance.GetUncorrectedTime();
+    public static double UncorrectedTime => _instance.GetUncorrectedTime();
 
     /// <summary>
     /// The current timestamp from when the time was last set.
