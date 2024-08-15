@@ -219,7 +219,7 @@ public partial class ChartController : Control
         }
             
         UpdateChartHud(NoteHitType.Miss, distanceFromTime, Statistics.Combo);
-        EmitSignal(SignalName.NoteMiss, this, noteData, distanceFromTime);
+        EmitSignal(SignalName.NoteMiss, this, noteData, distanceFromTime, noteEventResult);
         noteEventResult.Free();
     }
         
