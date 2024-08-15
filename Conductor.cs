@@ -13,7 +13,7 @@ public partial class Conductor : Node
     /// <summary>
     /// The current instance of the Conductor class.
     /// </summary>
-    public static Conductor Instance { get; private set; }
+    private static Conductor Instance;
     #endregion
 
     #region Status Variables
@@ -114,10 +114,14 @@ public partial class Conductor : Node
 
     #region Other Variables
     /// <summary>
-    /// Get all BPMs listed in the Conductor currently.
+    /// All BPMs listed in the Conductor currently.
     /// </summary>
-    [ExportGroup("Info")] 
-    private BpmInfo[] _Bpms { get => GetBpms(); set => SetBpms(value); }
+    public static BpmInfo[] Bpms
+    {
+        get => Instance._GetBpms();
+        set => Instance._SetBpms(value);
+    }
+    [ExportGroup("Info")]  private BpmInfo[] _Bpms { get => _GetBpms(); set => _SetBpms(value); }
         
     /// <summary>
     /// A whole number that indicates the number of beats in each measure.
@@ -243,24 +247,6 @@ public partial class Conductor : Node
     /// </summary>
     /// <returns>The current measure</returns>
     public static double GetCurrentMeasure() => Instance._GetCurrentMeasure();
-    
-    /// <summary>
-    /// Get all BPMs listed in the Conductor currently.
-    /// </summary>
-    /// <returns>All BPMs listed in the Conductor</returns>
-    public static BpmInfo[] GetBpms() => Instance._GetBpms();
-    
-    /// <summary>
-    /// Set the BPMs in the Conductor.
-    /// </summary>
-    /// <param name="data">An array of BpmInfos</param>
-    public static void SetBpms(BpmInfo[] data) => Instance._SetBpms(data);
-
-    public static BpmInfo[] Bpms
-    {
-        get => Instance._GetBpms();
-        set => Instance._SetBpms(value);
-    }
     #endregion
     
     #region Private Methods
