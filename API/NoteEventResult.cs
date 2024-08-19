@@ -6,14 +6,12 @@ namespace Promise.Framework.API;
 /// <summary>
 /// Flags for NoteEventResult. Will prevent the action from being activated.
 /// </summary>
-[Flags]
 public enum NoteEventProcessFlags : uint
 {
-    None = 0x0,
-    Animation = 0x1,
-    Health = 0x2,
-    Score = 0x4,
-    Splash = 0x8
+    None = 0b00000000_00000100_00000000_00000000,
+    Health = 0b00000000_00000100_00000000_00000001,
+    Score = 0b00000000_00000100_00000000_00000010,
+    Splash = 0b00000000_00000100_00000000_00000100
 }
 
 /// <summary>
@@ -39,7 +37,7 @@ public partial class NoteEventResult : GodotObject
     /// <summary>
     /// Flags for the ChartController to handle. Adding flags onto this will PREVENT the action from happening!
     /// </summary>
-    public NoteEventProcessFlags ProcessFlags;
+    public uint ProcessFlags;
 
     /// <summary>
     /// Empty initializer, will essentially create NoteEventResult.Nothing.
@@ -57,11 +55,32 @@ public partial class NoteEventResult : GodotObject
     /// </summary>
     /// <param name="flags">Flags for the ChartController to handle.</param>
     /// <param name="hitType">The type of note hit, or the ratinf</param>
-    public NoteEventResult(NoteEventProcessFlags flags, NoteHitType hitType = NoteHitType.None)
+    public NoteEventResult(NoteEventProcessFlags flags, NoteHitType hitType = NoteHitType.None) : this((uint)flags, hitType) { }
+    
+    /// <summary>
+    /// Creates a new NoteEventResult to be used on ChartControllers.
+    /// </summary>
+    /// <param name="flags">Flags for the ChartController to handle, in raw uint.</param>
+    /// <param name="hitType">The type of note hit, or the ratinf</param>
+    public NoteEventResult(uint flags, NoteHitType hitType = NoteHitType.None)
     {
         Hit = hitType;
         ProcessFlags = flags;
     }
+
+    /// <summary>
+    /// Checks whether the result has the specified flag.
+    /// </summary>
+    /// <param name="flag">The flag to check for</param>
+    /// <returns>If the process flags contains this flag.</returns>
+    public bool HasFlag(Enum flag) => HasFlag(Convert.ToUInt32(flag));
+
+    /// <summary>
+    /// Checks whether the result has the specified flag.
+    /// </summary>
+    /// <param name="flag">The flag to check for</param>
+    /// <returns>If the process flags contains this flag.</returns>
+    public bool HasFlag(uint flag) => (ProcessFlags & flag) == flag;
         
     /// <summary>
     /// Takes the higher rating and merges the process flags.
