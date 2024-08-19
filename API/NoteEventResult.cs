@@ -60,6 +60,13 @@ public partial class NoteEventResult : GodotObject
     /// <summary>
     /// Creates a new NoteEventResult to be used on ChartControllers.
     /// </summary>
+    /// <param name="flags">Flags for the ChartController to handle, with a custom enumerator. Make sure it relies on uint.</param>
+    /// <param name="hitType">The type of note hit, or the ratinf</param>
+    public NoteEventResult(Enum flags, NoteHitType hitType = NoteHitType.None) : this(Convert.ToUInt32(flags), hitType) { }
+    
+    /// <summary>
+    /// Creates a new NoteEventResult to be used on ChartControllers.
+    /// </summary>
     /// <param name="flags">Flags for the ChartController to handle, in raw uint.</param>
     /// <param name="hitType">The type of note hit, or the ratinf</param>
     public NoteEventResult(uint flags, NoteHitType hitType = NoteHitType.None)
