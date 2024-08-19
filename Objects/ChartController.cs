@@ -19,6 +19,11 @@ public partial class ChartController : Control
     [ExportGroup("Status"), Export] public ChartStatistics Statistics { get; private set; } = new();
 
     /// <summary>
+    /// The index of the current chart controller. Useful if you have multiple Chart Controllers.
+    /// </summary>
+    [Export] public int Index = 0;
+
+    /// <summary>
     /// The current note skin assigned to this ChartController.
     /// </summary>
     [ExportGroup("Settings"), Export] public NoteSkin NoteSkin { get; private set; }
