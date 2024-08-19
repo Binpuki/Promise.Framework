@@ -157,7 +157,9 @@ public partial class NoteLaneController : Control
             {
                 if (Notes[_noteHitIndex].MsTime - songPos <= 0)
                 {
-                    OnNoteHit(Notes[_noteHitIndex], 0, Notes[_noteHitIndex].Length > 0);
+                    if (!Notes[_noteHitIndex].ShouldMiss)
+                        OnNoteHit(Notes[_noteHitIndex], 0, Notes[_noteHitIndex].Length > 0);
+                    
                     _noteHitIndex++;
                 }
             }
@@ -168,7 +170,7 @@ public partial class NoteLaneController : Control
             {
                 if (Notes[_noteHitIndex].MsTime - songPos <= -PromiseData.HitWindows.Last())
                 {
-                    OnNoteMiss(Notes[_noteHitIndex], -PromiseData.HitWindows.Last() - 1);
+                    OnNoteMiss(Notes[_noteHitIndex], -PromiseData.HitWindows.Last() - 1, false);
                     _noteHitIndex++;
                 }
             }
@@ -269,7 +271,7 @@ public partial class NoteLaneController : Control
             }
         }
             
-        ParentController.OnNoteHit(noteData, PromiseData.HitTypes[hit], distanceFromTime, isHolding);
+        ParentController.OnNotePress(noteData, PromiseData.HitTypes[hit], distanceFromTime, isHolding);
     }
         
     /// <summary>
@@ -277,9 +279,10 @@ public partial class NoteLaneController : Control
     /// </summary>
     /// <param name="noteData">The note data</param>
     /// <param name="distanceFromTime">The distance from when the note was supposed to be hit.</param>
-    public void OnNoteMiss(NoteData noteData, double distanceFromTime)
+    /// <param name="held">If the note was a hold note, true if was let go while holding, false if missed entirely.</param>
+    public void OnNoteMiss(NoteData noteData, double distanceFromTime, bool held)
     {
-        ParentController.OnNoteMiss(noteData, distanceFromTime);
+        ParentController.OnNotePress(noteData, NoteHitType.Miss, distanceFromTime);
 
         Note[] notes = NoteContainer.GetChildrenOfType<Note>();
         if (notes != null)
@@ -341,7 +344,7 @@ public partial class NoteLaneController : Control
         while (Notes[_noteHitIndex].MsTime - songPos - PromiseData.Offset <= -PromiseData.HitWindows.Last())
         {
             // Miss every note thats too late first
-            OnNoteMiss(Notes[_noteHitIndex], -PromiseData.HitWindows.Last() - 1);
+            OnNoteMiss(Notes[_noteHitIndex], -PromiseData.HitWindows.Last() - 1, false);
             _noteHitIndex++;
         }
 
@@ -357,7 +360,7 @@ public partial class NoteLaneController : Control
             AnimationPlayer.Play("confirm"); // i guess it'd still be a good idea to give the satisfaction of hittin a note
             AnimationPlayer.Seek(0, true);
 
-            OnNoteMiss(Notes[_noteHitIndex], hitTime);
+            OnNoteMiss(Notes[_noteHitIndex], hitTime, true);
             _noteHitIndex++;
         }
         else
@@ -376,7 +379,7 @@ public partial class NoteLaneController : Control
             if (length <= PromiseData.HitWindows.Last())
                 OnNoteHit(NoteHeld, length, false);
             else
-                OnNoteMiss(NoteHeld, length);
+                OnNoteMiss(NoteHeld, length, true);
         }
 
         LaneGraphic.Material = null;

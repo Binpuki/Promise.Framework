@@ -48,8 +48,8 @@ public partial class ChartController : Control
     /// </summary>
     public Dictionary<string, INoteScript> NoteScripts { get; private set; } = new();
 
-    [Signal] public delegate void NoteHitEventHandler(ChartController chartCtrl, NoteData noteData, int hitType, double distanceFromTime, bool held, NoteEventResult result);
-    [Signal] public delegate void NoteMissEventHandler(ChartController chartCtrl, NoteData noteData, double distanceFromTime, NoteEventResult result);
+    [Signal] public delegate void NoteHitEventHandler(ChartController chartCtrl, NoteData noteData, NoteEventResult result, double distanceFromTime, bool held);
+    [Signal] public delegate void NoteMissEventHandler(ChartController chartCtrl, NoteData noteData, NoteEventResult result, double distanceFromTime, bool held);
     [Signal] public delegate void PressedEventHandler(NoteLaneController noteLaneController);
 
     public void Initialize(int laneCount, IndividualChart chart, bool autoplay = true, float scrollSpeed = 1.0f, NoteSkin noteSkin = null, ChartHud chartHud = null)
@@ -122,8 +122,8 @@ public partial class ChartController : Control
         ChartHud.SwitchDirection(downScroll);
         AddChild(ChartHud);
     }
-        
-    public void OnNoteHit(NoteData noteData, NoteHitType hitType, double distanceFromTime, bool held = false)
+
+    public void OnNotePress(NoteData noteData, NoteHitType hitType, double distanceFromTime, bool held = false)
     {
         NoteHitType hit = hitType;
 			
@@ -135,10 +135,16 @@ public partial class ChartController : Control
 
         if (noteScript != null)
         {
-            if (!held)
-                noteEventResult += noteScript.OnNoteHit(this, noteData, hit);
-            else
-                noteEventResult += noteScript.OnNoteHeld(this, noteData, hit);
+            if (hitType == NoteHitType.Miss)
+                noteEventResult += noteScript.OnNoteMiss(this, noteData, held);
+            
+            if (noteEventResult.Hit != NoteHitType.Miss && noteEventResult.Hit != NoteHitType.None)
+            {
+                if (!held)
+                    noteEventResult += noteScript.OnNoteHit(this, noteData, hit);
+                else
+                    noteEventResult += noteScript.OnNoteHeld(this, noteData, hit);
+            }
 				
             hit = noteEventResult.Hit;
         }
@@ -146,16 +152,23 @@ public partial class ChartController : Control
         switch (hit)
         {
             case NoteHitType.Miss:
-                OnNoteMiss(noteData, distanceFromTime);
+                OnNoteMiss(noteData, noteEventResult, distanceFromTime, held);
                 return;
             case NoteHitType.None:
+                noteEventResult.Free();
+                return;
+            default:
+                OnNoteHit(noteData, noteEventResult, distanceFromTime, held);
                 return;
         }
-			
-        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Health))
+    }
+        
+    public void OnNoteHit(NoteData noteData, NoteEventResult result, double distanceFromTime, bool held = false)
+    {
+        if (!result.HasFlag(NoteEventProcessFlags.Health))
         {
             float health = 0f;
-            switch (hit)
+            switch (result.Hit)
             {
                 case NoteHitType.Perfect:
                     Statistics.PerfectHits++;
@@ -186,7 +199,7 @@ public partial class ChartController : Control
                 Statistics.Health = 0;
         }
 
-        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Score))
+        if (!result.HasFlag(NoteEventProcessFlags.Score))
         {
             Statistics.Combo++;
             Statistics.HighestCombo = Statistics.Combo > Statistics.HighestCombo ? Statistics.Combo : Statistics.HighestCombo;
@@ -197,26 +210,17 @@ public partial class ChartController : Control
             Statistics.MissStreak = 0;	
         }
 				
-        UpdateChartHud(hit, distanceFromTime, Statistics.Combo);
-        EmitSignal(SignalName.NoteHit, this, noteData, (int)hitType, distanceFromTime, held, noteEventResult);
-        noteEventResult.Free();
+        UpdateChartHud(result.Hit, distanceFromTime, Statistics.Combo);
+        EmitSignal(SignalName.NoteHit, this, noteData, result, distanceFromTime, held);
+        result.Free();
     }
 
-    public void OnNoteMiss(NoteData noteData, double distanceFromTime)
+    public void OnNoteMiss(NoteData noteData, NoteEventResult result, double distanceFromTime, bool held = false)
     {
-        NoteEventResult noteEventResult = new NoteEventResult(NoteHitType.Miss);
-        string noteType = noteData.Type;
-        INoteScript noteScript = NoteScripts.ContainsKey(noteType)
-            ? NoteScripts[noteType]
-            : null;
-
-        if (noteScript != null)
-            noteEventResult += noteScript.OnNoteMiss(this, noteData);
-			
-        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Health))
+        if (!result.HasFlag(NoteEventProcessFlags.Health))
             Statistics.Health += (-0.1f - (Statistics.MissStreak * 0.08f)) * (noteData.Length > 0 ? 0.5f : 1f);
 
-        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Score))
+        if (!result.HasFlag(NoteEventProcessFlags.Score))
         {
             Statistics.Combo = 0;
             Statistics.Misses++;
@@ -224,8 +228,8 @@ public partial class ChartController : Control
         }
             
         UpdateChartHud(NoteHitType.Miss, distanceFromTime, Statistics.Combo);
-        EmitSignal(SignalName.NoteMiss, this, noteData, distanceFromTime, noteEventResult);
-        noteEventResult.Free();
+        EmitSignal(SignalName.NoteMiss, this, noteData, result, distanceFromTime, held);
+        result.Free();
     }
         
     public void OnLanePress(NoteLaneController lane)
