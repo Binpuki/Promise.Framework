@@ -56,7 +56,6 @@ public partial class HitDistance : Control
     /// </summary>
     /// <param name="distance">The distance from when the note was supposed to be hit, in seconds.</param>
     /// <param name="rating">The rating</param>
-    /// <param name="comboReset">If true, will reset the combo to the rating provided, otherwise, keep the lowest rating.</param>
     public virtual void Play(double distance, NoteHitType rating)
     {
         Label.Text = $"{Math.Round(distance, 2)} ms";
