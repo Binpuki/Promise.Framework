@@ -45,6 +45,7 @@ public interface INoteScript
     /// </summary>
     /// <param name="chartCtrl">The chart controller this data belongs to</param>
     /// <param name="noteData">The note data</param>
+    /// <param name="held">If the note was a hold note, true if was let go while holding, false if missed entirely.</param>
     /// <returns></returns>
-    public NoteEventResult OnNoteMiss(ChartController chartCtrl, NoteData noteData) => NoteEventResult.NothingMiss;
+    public NoteEventResult OnNoteMiss(ChartController chartCtrl, NoteData noteData, bool held) => NoteEventResult.NothingMiss;
 }
