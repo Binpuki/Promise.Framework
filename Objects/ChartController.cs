@@ -147,7 +147,7 @@ public partial class ChartController : Control
                 return;
         }
 			
-        if (!noteEventResult.ProcessFlags.HasFlag(NoteEventProcessFlags.Health))
+        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Health))
         {
             float health = 0f;
             switch (hit)
@@ -181,7 +181,7 @@ public partial class ChartController : Control
                 Statistics.Health = 0;
         }
 
-        if (!noteEventResult.ProcessFlags.HasFlag(NoteEventProcessFlags.Score))
+        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Score))
         {
             Statistics.Combo++;
             Statistics.HighestCombo = Statistics.Combo > Statistics.HighestCombo ? Statistics.Combo : Statistics.HighestCombo;
@@ -208,10 +208,10 @@ public partial class ChartController : Control
         if (noteScript != null)
             noteEventResult += noteScript.OnNoteMiss(this, noteData);
 			
-        if (!noteEventResult.ProcessFlags.HasFlag(NoteEventProcessFlags.Health))
+        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Health))
             Statistics.Health += (-0.1f - (Statistics.MissStreak * 0.08f)) * (noteData.Length > 0 ? 0.5f : 1f);
 
-        if (!noteEventResult.ProcessFlags.HasFlag(NoteEventProcessFlags.Score))
+        if (!noteEventResult.HasFlag(NoteEventProcessFlags.Score))
         {
             Statistics.Combo = 0;
             Statistics.Misses++;
