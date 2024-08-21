@@ -205,7 +205,7 @@ public partial class Conductor : Node
     {
         if (!Playing)
         {
-            _relativeStartTime = Godot.Time.GetTicksMsec() / 1000d;
+            _relativeStartTime = Godot.Time.GetUnixTimeFromSystem() / 1000d;
             _relativeTimeOffset = _time;
         }
 
@@ -254,7 +254,7 @@ public partial class Conductor : Node
         
     #region Getters and Setters
     private double GetRawTime() =>
-        Playing ? Godot.Time.GetTicksMsec() / 1000d - _relativeStartTime + _relativeTimeOffset :
+        Playing ? Godot.Time.GetUnixTimeFromSystem() - _relativeStartTime + _relativeTimeOffset :
         _time != 0d ? _time : 0d;
     
     private double GetUncorrectedTime() => GetRawTime() + ChartOffset / 1000d;
@@ -264,7 +264,7 @@ public partial class Conductor : Node
     private void SetTime(double time)
     {
         _time = time;
-        _relativeStartTime = Godot.Time.GetTicksMsec() / 1000d;
+        _relativeStartTime = Godot.Time.GetUnixTimeFromSystem();
         _relativeTimeOffset = time;
     }
     
