@@ -58,7 +58,7 @@ public partial class HitDistance : Control
     /// <param name="rating">The rating</param>
     public virtual void Play(double distance, NoteHitType rating)
     {
-        Label.Text = $"{Math.Round(distance, 2)} ms";
+        Label.Text = $"{distance:0.00} ms";
         if (Math.Abs(distance) > PromiseData.HitWindows.Last())
             Label.Text = $"Too {(distance < 0 ? "late!" : "early!")}";
 
