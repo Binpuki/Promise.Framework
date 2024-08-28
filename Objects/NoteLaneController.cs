@@ -192,7 +192,7 @@ public partial class NoteLaneController : Control
                 note.Name = $"Note {_noteSpawnIndex}";
                 NoteContainer.AddChild(note);
                 if (ParentController.NoteScripts.ContainsKey(Notes[_noteSpawnIndex].Type))
-                    ParentController.NoteScripts[Notes[_noteSpawnIndex].Type].OnNoteCreate(ParentController, note);
+                    ParentController.NoteScripts[Notes[_noteSpawnIndex].Type].OnNoteSpawn(ParentController, note);
 						
                 _noteSpawnIndex++;
             }

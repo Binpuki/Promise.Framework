@@ -75,7 +75,7 @@ public partial class ChartController : Control
                     INoteScript noteScript = (INoteScript)t.GetConstructor(new Type[] { }).Invoke(new object[] { });
                     NoteData[] matchingNotes = Chart.Notes.Where(x => x.Type == typeBind.NoteType).ToArray();
                     for (int j = 0; j < matchingNotes.Length; j++)
-                        noteScript.BeforeNoteCreate(this, matchingNotes[j]);
+                        noteScript.OnNoteCreate(this, matchingNotes[j]);
 			            
                     NoteScripts.Add(typeBind.NoteType, noteScript);
                 }

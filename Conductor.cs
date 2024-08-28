@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using Promise.Framework.Chart;
 
@@ -96,6 +97,33 @@ public partial class Conductor : Node
     public static double CurrentMeasure => _instance.GetCurrentMeasure();
     #endregion
 
+    #region Event Handlers
+    /// <summary>
+    /// Event triggered when a beat is hit.
+    /// </summary>
+    [Signal]
+    public delegate void BeatHitEventHandler(int beat);
+    public static event BeatHitEventHandler OnBeatHit;
+
+    /// <summary>
+    /// Event triggered when a step is hit.
+    /// </summary>
+    [Signal]
+    public delegate void StepHitEventHandler(int step);
+    public static event StepHitEventHandler OnStepHit;
+    
+    /// <summary>
+    /// Event triggered when a measure (section) is hit.
+    /// </summary>
+    [Signal]
+    public delegate void MeasureHitEventHandler(int section);
+    public static event MeasureHitEventHandler OnMeasureHit;
+
+    private int _lastBeat = -1;
+    private int _lastStep = -1;
+    private int _lastMeasure = -1;
+    #endregion
+    
     #region Other Variables
     /// <summary>
     /// All BPMs listed in the Conductor currently.
@@ -217,6 +245,31 @@ public partial class Conductor : Node
             BpmIndex++;
             Bpm = BpmList[BpmIndex].Bpm;
         }
+        
+        int beat = (int)Math.Floor(CurrentBeat);
+        int step = (int)Math.Floor(CurrentStep);
+        int measure = (int)Math.Floor(CurrentMeasure);
+
+        if (beat > _lastBeat)
+        {
+            _lastBeat = beat;
+            EmitSignal(SignalName.BeatHit, beat);
+            OnBeatHit?.Invoke(beat);
+        }
+
+        if (step > _lastStep)
+        {
+            _lastStep = step;
+            EmitSignal(SignalName.StepHit, step);
+            OnStepHit?.Invoke(step);
+        }
+
+        if (measure > _lastMeasure)
+        {
+            _lastMeasure = measure;
+            EmitSignal(SignalName.MeasureHit, measure);
+            OnMeasureHit?.Invoke(measure);
+        }
     }
     #endregion
     
@@ -270,7 +323,7 @@ public partial class Conductor : Node
     
     private double GetCurrentStep()
     {
-        if (_cachedStepTime == Time)
+        if (_cachedStepTime.Equals(Time))
             return _cachedStep;
 
         if (BpmList.Length <= 1)
@@ -283,7 +336,7 @@ public partial class Conductor : Node
     
     private double GetCurrentBeat()
     {
-        if (_cachedBeatTime == Time)
+        if (_cachedBeatTime.Equals(Time))
             return _cachedBeat;
 
         if (BpmList.Length <= 1)
@@ -296,7 +349,7 @@ public partial class Conductor : Node
     
     private double GetCurrentMeasure()
     {
-        if (_cachedMeasureTime == Time)
+        if (_cachedMeasureTime.Equals(Time))
             return _cachedMeasure;
 
         if (BpmList.Length <= 1)
