@@ -13,14 +13,14 @@ public interface INoteScript
     /// </summary>
     /// <param name="chartCtrl">The chart controller this data belongs to</param>
     /// <param name="noteData">The note data</param>
-    public void BeforeNoteCreate(ChartController chartCtrl, NoteData noteData);
+    public void OnNoteCreate(ChartController chartCtrl, NoteData noteData);
 
     /// <summary>
     /// Triggers when the note graphic is spawned.
     /// </summary>
     /// <param name="chartCtrl">The chart controller this note belongs to</param>
     /// <param name="note">The created note.</param>
-    public void OnNoteCreate(ChartController chartCtrl, Note note);
+    public void OnNoteSpawn(ChartController chartCtrl, Note note);
 
     /// <summary>
     /// Triggers when a regular note is hit, or when a hold note is successfully completed.
